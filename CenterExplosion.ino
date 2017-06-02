@@ -33,23 +33,16 @@ void set_beam_length_behind(int i) {
 }
 
 void launch_at_center() {
-  
-}
-
-void loop() {
-//  for (int l=NUM_LEDS;l>NUM_LEDS/2+beam_length;l--){
-//    set_beam_length_behind(l);
-//    delay(delay_time);
-//    FastLED.show();
-//  }
-//  FastLED.clear();
-
   for (int l=0;l<NUM_LEDS/2-beam_length+1;l++) {
     set_beam_length_ahead(l);
     set_beam_length_behind(NUM_LEDS-l);
     delay(delay_time);
     FastLED.show();
   }
+}
+
+void loop() {
+  launch_at_center();
   FastLED.clear();
 
 
