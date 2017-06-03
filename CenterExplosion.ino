@@ -1,12 +1,16 @@
 #include <FastLED.h>
 #define NUM_LEDS 99 // Make this an odd number
 #define DATA_PIN 6
-#define COLOR_1 Blue
+#define COLOR_1 Red
 #define COLOR_2 Red
+#define CHARGING_COLOR_1 Purple
+#define CHARGING_COLOR_2 Yellow
 
 CRGB leds[NUM_LEDS];
 const int beam_length = 5;
-const int delay_time = 50;
+const int initial_beam_speed = 60; // lower = faster
+const int mid_pix = NUM_LEDS/2;
+const int charge_length = 500;
 
 void setup() { 
   FastLED.addLeds<NEOPIXEL, DATA_PIN>(leds, NUM_LEDS);
@@ -37,7 +41,8 @@ void initialize_beams() {
     leds[i]=CRGB::COLOR_1;
     leds[NUM_LEDS-1-i]=CRGB::COLOR_2;
     FastLED.show();
-    delay(delay_time);
+    if (i<beam_length-1)
+      delay(initial_beam_speed);
   }
 }
 
@@ -47,16 +52,34 @@ void launch_at_center() {
   for (int l=0;l<=NUM_LEDS/2-beam_length;l++) {
     set_beam_length_ahead(l);
     set_beam_length_behind(NUM_LEDS-1-l);
-    delay(delay_time);
+    delay(initial_beam_speed);
     FastLED.show();
+  }
+}
+
+void charge_center() {
+  int a = beam_length;
+  for (int i=0;i<charge_length;i++) {
+    if (i%2==0) {
+      leds[mid_pix]=CRGB::CHARGING_COLOR_1;
+    }
+    else {
+      leds[mid_pix]=CRGB::CHARGING_COLOR_2;
+    }
+    delay(80);
+    FastLED.show();
+//    if (a>0) {
+//      leds[mid_pix+a]=CRGB::Black;
+//      leds[mid_pix-a]=CRGB::Black;
+//      a--;
+//    }
   }
 }
 
 void loop() {
   initialize_beams();
   launch_at_center();
-  leds[NUM_LEDS/2] = CRGB::Yellow;
-  FastLED.show();
+  charge_center();
   delay(4000);
 //  set_beam_length_behind(NUM_LEDS);
 //  FastLED.show();
