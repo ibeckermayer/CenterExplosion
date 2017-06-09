@@ -2,15 +2,15 @@
 #define NUM_LEDS 99 // Make this an odd number
 #define DATA_PIN 6
 #define COLOR_1 Red
-#define COLOR_2 Red
-#define CHARGING_COLOR_1 Purple
-#define CHARGING_COLOR_2 Yellow
+#define COLOR_2 Blue
+#define CHARGING_COLOR_1 White 
+#define CHARGING_COLOR_2 Purple
 
 CRGB leds[NUM_LEDS];
 const int beam_length = 5;
-const int initial_beam_speed = 60; // lower = faster
+const int initial_beam_speed = 50; // lower = faster
 const int mid_pix = NUM_LEDS/2;
-const int charge_length = 500;
+const int charge_length = 100;
 
 void setup() { 
   FastLED.addLeds<NEOPIXEL, DATA_PIN>(leds, NUM_LEDS);
@@ -52,27 +52,64 @@ void launch_at_center() {
   for (int l=0;l<=NUM_LEDS/2-beam_length;l++) {
     set_beam_length_ahead(l);
     set_beam_length_behind(NUM_LEDS-1-l);
-    delay(initial_beam_speed);
+    if (l<NUM_LEDS/2-beam_length){
+      delay(initial_beam_speed);
+    }
     FastLED.show();
   }
 }
 
 void charge_center() {
   int a = beam_length;
-  for (int i=0;i<charge_length;i++) {
+  int d = initial_beam_speed;
+  for (int i=1;i<charge_length;i++) {
     if (i%2==0) {
       leds[mid_pix]=CRGB::CHARGING_COLOR_1;
     }
     else {
       leds[mid_pix]=CRGB::CHARGING_COLOR_2;
     }
-    delay(80);
+    if (a>0) {
+      leds[mid_pix+a]=CRGB::Black;
+      leds[mid_pix-a]=CRGB::Black;
+      a--;
+      delay(d);
+      d=d-.02;
+    }
+    else{
+      delay(d); 
+      d=d-.02;
+    }
     FastLED.show();
-//    if (a>0) {
-//      leds[mid_pix+a]=CRGB::Black;
-//      leds[mid_pix-a]=CRGB::Black;
-//      a--;
-//    }
+  }
+  center_flash(d);
+}
+
+void center_flash(int d) {
+  int center_flash_length = 70;
+  for (int i=0;i<center_flash_length;i++) {
+    if (i%2==0) {
+      leds[mid_pix]=CRGB::CHARGING_COLOR_1;
+    }
+    else {
+      leds[mid_pix]=CRGB::CHARGING_COLOR_2;
+    }
+    FastLED.show();
+    delay(d);
+  }
+}
+
+void explosion() {
+  shoot_out_from_center();
+}
+
+void shoot_out_from_center() {
+  float SPEED = 8; // how fast shit will shoot out
+  for (int i=0;i<=mid_pix;i++) {
+    leds[mid_pix+i]=CRGB::CHARGING_COLOR_2;
+    leds[mid_pix-i]=CRGB::CHARGING_COLOR_2;
+    FastLED.show();
+    delay(initial_beam_speed/SPEED);
   }
 }
 
@@ -80,9 +117,6 @@ void loop() {
   initialize_beams();
   launch_at_center();
   charge_center();
-  delay(4000);
-//  set_beam_length_behind(NUM_LEDS);
-//  FastLED.show();
-//  delay(1000);
+  explosion();
   FastLED.clear();
 }
